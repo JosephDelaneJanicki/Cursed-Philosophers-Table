@@ -26,3 +26,7 @@ I was planning on using a simple boolean array for the forks to track their avai
 
 I'll keep this readme updated as this project continues
 
+UPDATE 1: 9/11/2023
+
+  I have the begining of the philosophers Code that defines the philosopher object, how the philosophers behave, and maps them to threads.
+
