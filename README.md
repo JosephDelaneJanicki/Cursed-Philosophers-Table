@@ -28,5 +28,7 @@ I'll keep this readme updated as this project continues
 
 UPDATE 1: 9/11/2023
 
-  I have the begining of the philosophers Code that defines the philosopher object, how the philosophers behave, and maps them to threads.
+  I have the begining of the philosophers Code that defines the philosopher object, how the philosophers behave, and maps them to threads. 
+  
+  I have also made a cuda control file to ensure nothing is wrong with cuda and C++ 20 compilation. my time was largely spent making sure this wont be an issue for me as I make this
 
