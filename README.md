@@ -32,3 +32,8 @@ UPDATE 1: 9/11/2023
   
   I have also made a cuda control file to ensure nothing is wrong with cuda and C++ 20 compilation. my time was largely spent making sure this wont be an issue for me as I make this
 
+UPDATE 2: 9/14/2023
+
+  I have added some device functions to the Philosopher object. I plan to handle device/gpu memory in the cuda code rather then host due to the potential for non trivial members in the object.
+  
+  The functions are simple in form now and will be changed as the object does. Hoping to have more time soon for bigger updates. I'm  teaching myself cuda as I do this.
