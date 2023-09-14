@@ -21,9 +21,11 @@ public:
         cudaFree(this);
     }
 };
-
+// Fork object to allow solutions that involve changing something about the fork/forks.
 class Fork{
 public:
+    int temprature {}; // how hot or cold the fork is to the touch
+    bool available = true;  //fork availability to pick up
     
 };
 
