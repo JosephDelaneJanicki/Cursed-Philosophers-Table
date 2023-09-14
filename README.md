@@ -37,3 +37,10 @@ UPDATE 2: 9/14/2023
   I have added some device functions to the Philosopher object. I plan to handle device/gpu memory in the cuda code rather then host due to the potential for non trivial members in the object.
   
   The functions are simple in form now and will be changed as the object does. Hoping to have more time soon for bigger updates. I'm  teaching myself cuda as I do this.
+  
+  Added test kernel to testand debug different solutions in a controled vacuum in isolation. 
+
+  The test table will have 5 philosophers.
+
+  Fork object added.
+  
