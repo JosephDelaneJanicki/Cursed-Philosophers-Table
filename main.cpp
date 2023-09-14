@@ -1,6 +1,7 @@
 #include <iostream>
 #include "philosopher.cu"
 #include <cuda_runtime.h>
+// Host Code
 int main() {
     // garuntees gpu 0 is used for those running sli however unlikely it is
     cudaError_t cudaStatus = cudaSetDevice(0); 
