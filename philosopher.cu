@@ -6,8 +6,20 @@
 // Philosopher definition
 class Philosopher {
 public:
+
     // TODO: Define philosopher states and actions 
 
+    //Due to Philosopher being an object its best to handle device memory with device functions made below
+    void AllocateToDevice(Philosopher** devicePtr){
+
+        cudaMalloc((void**)devicePtr,sizeof(Philosopher));
+
+        cudaMemcpy(*devicePtr, this, sizeof(Philosopher), cudaMemcpyHostToDevice);
+
+    }
+    void FreeDeviceMemory(){
+        cudaFree(this);
+    }
 };
 
 // kernel definition
