@@ -44,3 +44,11 @@ UPDATE 2: 9/14/2023
 
   Fork object added.
   
+UPDATE 3: 9/15/2023
+
+  Added the logic for picking up forks. Two versions actually:
+    The first version is the default version. the philosopher picks up one fork at a time allowing for deadlock. 
+    
+    The second version is what i plan to have become my first solution to the problem. as the first its not a "Cursed" solution. the idea is to have philosophers pick up both forks simultaniously. 
+    This means philosophers will all either have both forks, or have no forks. Theoretically no deadlock. I'll see if the solution implemented works out in practice.
+  
