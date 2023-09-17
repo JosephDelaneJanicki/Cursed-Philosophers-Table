@@ -35,4 +35,8 @@ UPDATE 3: 9/15/2023
     The first version is the default version. the philosopher picks up one fork at a time allowing for deadlock. 
     The second version is what i plan to have become my first solution to the problem. as the first its not a "Cursed" solution. the idea is to have philosophers pick up both forks simultaniously. 
     This means philosophers will all either have both forks, or have no forks. Theoretically no deadlock. I'll see if the solution implemented works out in practice.
+
+UPDATE 4: 9/16/2023
+
+  Added mutexes and got more of the fork object made. VS code is throwing a fit over not recognizing atomicExch as a thing that exists so next time I work on this will be me troubleshooting that. I have a feeling some part of my instalation is outdated.
   
