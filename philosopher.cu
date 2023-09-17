@@ -4,12 +4,15 @@
 #include <device_launch_parameters.h>
 #include <curand_kernel.h>
 
+
+//initializa mutex
+/*NOTE: avoid mutexes in philosopher class, mutexes would be best in the fork class and kernel to minimize sequential time and maximize parrallel time. philosophers do the things 
+forks are the rescources so let the forks protect themselves with mutexes philosophers are supposed to be fork greedy */
+__device__ __host__ int mutex; // Declare a mutex variable
+
 // Philosopher definition
 class Philosopher {
 public:
-
-    // TODO: Define philosopher states and actions 
-
     /*NOTE: the busy wait loops are temporary measures to provide something the kernel can use to 
     simulate the philosphers they consume CPU cycles and generally arent cuda friendly. once i have the philosophers in deadlock
     ill go back and replace these with synchronization primitives*/
@@ -19,7 +22,7 @@ public:
         while (clock() - startTime < 1000000) { /*the philosopher is thinking, using a busy wait loop to simulate it for now will add logic as needed later on*/ }
     }
     __device__ void tryToPickUpForks(Fork& leftFork, Fork& rightFork){
-        if (leftFork.available)  {leftFork.pickUp(); think();}  // by thinking here i can garuntee deadlock since now the forks are picked up one at a time
+        if (leftFork.isAvailable())  {leftFork.pickUp(); think();}  // by thinking here i can garuntee deadlock since now the forks are picked up one at a time
         else  think(); tryToPickUpForks;
         while(rightFork.isAvailable() == false) think();
         rightFork.pickUp();
@@ -30,15 +33,15 @@ public:
     /*by picking up the forks at the same time and dropping at the same time deadlock should be avoided.
     this i believe will be my first solution before going down the "cursed rought"*/
     __device__ void tryToPickUpForksAvoidDeadlock(Fork& leftFork, Fork& rightFork) {
-    if (leftFork.isAvailable() && rightFork.isAvailable()) {
-        leftFork.pickUp();
-        rightFork.pickUp();
-        eat(leftFork, rightFork);
-        leftFork.putDown();
-        rightFork.putDown();
-    } 
-    else think();
-}
+        if (leftFork.isAvailable() && rightFork.isAvailable()) {
+            leftFork.pickUp();
+            rightFork.pickUp();
+            eat(leftFork, rightFork);
+            leftFork.putDown();
+            rightFork.putDown();
+        } 
+        else think();
+    }
     __device__ void eat(Fork& leftFork, Fork& rightFork){
 
         int startTime = clock();
@@ -60,26 +63,37 @@ public:
 };
 // Fork object to allow solutions that involve changing something about the fork/forks. Forks are picked up and put down by philosophers
 class Fork{
-public:
-    int temprature {}; // how hot or cold the fork is to the touch
+private:
     bool available = true;  //fork availability to pick up, by default they are available
+    int* mutex; // Private mutex for each fork
+public:
 
-    // this method 
-    bool isAvailable() {
-        // You can use atomic operations or locks here for thread safety
-        // For example, you can use atomic operations like atomicCAS in CUDA
+    int temprature {}; // how hot or cold the fork is to the touch
+
+    // this method checks if a fork is available since this is a read only method i dont have a mutex here
+    __device__ bool isAvailable() {
         return available;
     }
-    // this method allows the fork to be picked up
-    bool pickUp(){
-        
-        if (available) available = false;
-        else return false;
 
+    // this method allows the fork to be picked up
+    __device__ bool pickUp() {
+    while (atomicExch(mutex, 1) != 0) {
+        // Wait while the mutex is locked
     }
 
-    // this method allows the fork to be put down
-    void putDown() {available = true;}
+    if (available) {
+        available = false;
+        return true; // Successfully picked up the fork
+    } else {
+        atomicExch(mutex, 0); // Release the mutex
+        return false; // Fork is not available
+    }
+}
+// I opted not to use a mutex on this function since only one philosopher will be attempting to use this method per fork at any time
+__device__ void putDown() {
+    available = true; // Fork is now available for other philosophers
+}
+
 };
 
 // kernel definition

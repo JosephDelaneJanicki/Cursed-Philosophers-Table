@@ -5,6 +5,9 @@
 
 // Host Code
 int main() {
+    //initialize mutex
+    mutex = 0;
+    
     // garuntees gpu 0 is used for those running sli however unlikely it is
     cudaError_t cudaStatus = cudaSetDevice(0); 
 
