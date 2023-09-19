@@ -13,18 +13,17 @@ __device__ int mutex; // Declare a mutex variable
 // Philosopher definition
 class Philosopher {
     public:
-        /*NOTE: the busy wait loops are temporary measures to provide something the kernel can use to 
-        simulate the philosphers they consume CPU cycles and generally arent cuda friendly. once i have the philosophers in deadlock
-        ill go back and replace these with synchronization primitives*/
-        __device__ void think() {
 
+        __device__ void think() {
             int startTime = clock();
             while (clock() - startTime < 1000000) { /*the philosopher is thinking, using a busy wait loop to simulate it for now will add logic as needed later on*/ }
-
         }
+
         __device__ void tryToPickUpForks(Fork& leftFork, Fork& rightFork){
+
             if (leftFork.isAvailable())  {leftFork.pickUp(); think();}  // by thinking here i can garuntee deadlock since now the forks are picked up one at a time
             else  think(); tryToPickUpForks;
+
             while(rightFork.isAvailable() == false) think();
             rightFork.pickUp();
             eat(leftFork, rightFork);
@@ -43,20 +42,16 @@ class Philosopher {
             } 
             else think();
         }
-        __device__ void eat(Fork& leftFork, Fork& rightFork){
 
+        __device__ void eat(Fork& leftFork, Fork& rightFork){
             int startTime = clock();
             while (clock() - startTime < 1000000) { /*the philosopher is eating, using a busy wait loop to simulate it for now. will add logic as needed later on*/ }
-
         }
 
         //Due to Philosopher being an object its best to handle device memory with device functions made below
         void allocateToDevice(Philosopher** devicePtr){
-
             cudaMalloc((void**)devicePtr,sizeof(Philosopher));
-
             cudaMemcpy(*devicePtr, this, sizeof(Philosopher), cudaMemcpyHostToDevice);
-
         }
         void freeDeviceMemory(){
             cudaFree(this);
@@ -65,8 +60,10 @@ class Philosopher {
 // Fork object to allow solutions that involve changing something about the fork/forks. Forks are picked up and put down by philosophers
 class Fork{
     private:
+
         bool available = true;  //fork availability to pick up, by default they are available
         int* mutex; // Private mutex for each fork
+
     public:
 
         int temprature {}; // how hot or cold the fork is to the touch
@@ -84,12 +81,11 @@ class Fork{
             /*other philosophers need to be able to read the fork object to check availability. 
             I also want to minimize mutext time so im closing the mutex imediately when available value changes*/ 
             if (available) {
-            available = false;
-            atomicExch(mutex, 0); // Release the mutex 
-            return true; // Successfully picked up the fork
+                available = false;
+                atomicExch(mutex, 0); // Release the mutex 
+                return true; // Successfully picked up the fork
             }       
             else {
-
                 atomicExch(mutex, 0); // Release the mutex
                 return false; // Fork is not available
             }
