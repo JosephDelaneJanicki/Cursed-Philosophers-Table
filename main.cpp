@@ -22,7 +22,7 @@ int main() {
     
     // theoretically makes philosophers on host and puts them on the gpu. apon further analasys it the philosophers will be too complex to copy directly on the gpu
     // ill have to use device functions in philosopher.cu to manage memory
-    /*// Transfer philosopher object to the device
+    // Transfer philosopher object to the device
     Philosopher* devicePhilosopher;
     cudaMalloc((void**)&devicePhilosopher, sizeof(Philosopher));
     cudaMemcpy(devicePhilosopher, &hostPhilosopher, sizeof(Philosopher), cudaMemcpyHostToDevice);
@@ -30,7 +30,7 @@ int main() {
     // Perform GPU operations with devicePhilosopher
     
     // Cleanup
-    cudaFree(devicePhilosopher);*/
+    cudaFree(devicePhilosopher);
 
     return 0;
 }
