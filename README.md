@@ -46,3 +46,7 @@ UPDATE 5: 9/19/2023
   Any philosophers that pick up a fork would've kept the fork in a mutex forever. I fixed this by closing the mutex in the if staement rather then in the put down method that  way other philosophers can still read the fork for availability.
   I though about re-implamenting to use a mutex to lock philosophers from forks but i dont really need to since the availability variable already handles it and doing it this way alows for solutions where philosophers could steal eachothers forks witch is in the spirit of the absurdity im going for.
   beyond that I fixed the indentations to make the code look better and be more readable. i like to pride myself on aesthetically pleasing code.
+
+Update 6:
+
+  I have an array of philosophers allocated to my gpu. I'll be following a similar process to allocate the forks and from there I should be good to envoke the kernel from main and manage the simulation from there.
