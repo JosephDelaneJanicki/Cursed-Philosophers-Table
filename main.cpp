@@ -2,7 +2,11 @@
 #include "philosopher.cu"
 #include <cuda_runtime.h>
 #include <random>
+#include <format>
 
+using std::format;
+using std::cout;
+using std::cin;
 // Host Code
 int main() {
     //initialize mutex
@@ -17,17 +21,29 @@ int main() {
         return 1;
     }
 
-    // Create philosopher objects in host code
-    Philosopher hostPhilosopher;
-    
-    // Makes philosophers on host and puts them on the gpu. apon further analasys it the philosophers will be too complex to copy directly on the gpu
+    int numOfPhilosophers {}; // initialize where the number of philosophers will be stored
+    //prompt for the number of philosophers and read input
+    while (true){
+        cout << format("How many philosophers would you like to simulate?");
+        if (cin >> numOfPhilosophers && numOfPhilosophers > 0) break;
+        else{
+            cout << "Invalid input. the number of philosophers must be a positive integer" << std::endl;
+            cin.clear(); // Clear any error flags
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard the rest of the line
+        }
+    }
+
+    // Create philosopher objects in host code this has function scope and as a result will only call from main and be destroyed when we move to the kernel (assuming main finishes)
+    Philosopher* hostPhilosophers = new Philosopher[numOfPhilosophers];
+    // Makes philosophers on host and puts them on the gpu.
     Philosopher* devicePhilosopher;
     cudaMalloc((void**)&devicePhilosopher, sizeof(Philosopher));
-    cudaMemcpy(devicePhilosopher, &hostPhilosopher, sizeof(Philosopher), cudaMemcpyHostToDevice);
+    cudaMemcpy(devicePhilosopher, &hostPhilosophers, sizeof(Philosopher), cudaMemcpyHostToDevice);
 
     // Perform GPU operations with devicePhilosopher
     
     // Cleanup
+    delete[] hostPhilosophers;
     cudaFree(devicePhilosopher);
 
     return 0;
