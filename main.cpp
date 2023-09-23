@@ -34,7 +34,7 @@ int main() {
     }
 
     /* Create philosopher objects in host code this has function scope and as a result will only call from main and be destroyed when we move to the kernel (assuming main finishes)
-    the line below should account for C++'s requirement to know the size of the array at compilation by using dynamic allocation in the form of the "new" operator.*/
+    the line below should account for C++'s requirement to know the size of the array at compilation by using the heap and envoking the "new" operator.*/
     Philosopher* hostPhilosophers = new Philosopher[numOfPhilosophers];
     // Makes philosophers on host and puts them on the gpu.
     Philosopher* devicePhilosopher;
