@@ -21,12 +21,24 @@ int main() {
         return 1;
     }
     int numOfPhilosophers {}; // initialize where the number of philosophers will be stored
+    int simulationChoice {};
     //prompt for the number of philosophers and read input
     while (true){
         cout << format("How many philosophers would you like to simulate?");
         if (cin >> numOfPhilosophers && numOfPhilosophers > 0) break;
         else{
             cout << "Invalid input. the number of philosophers must be a positive integer" << std::endl;
+            cin.clear(); // Clear any error flags
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard the rest of the line
+        }
+    }
+    /*this is a prompt to allow me to choose between the test kernel and the main kernel in runtime*/
+    while (true){
+        cout << format("do you wish to use the main or test simulation: type 1 for main and 2 for test");
+        cin >> simulationChoice;
+        if ( simulationChoice == 1 || simulationChoice == 2) break;
+    else{
+            cout << "Invalid input. type 1 for main, type 2 for test" << std::endl;
             cin.clear(); // Clear any error flags
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard the rest of the line
         }
@@ -43,11 +55,24 @@ int main() {
     cudaMemcpy(devicePhilosopher, &hostPhilosophers, sizeof(Philosopher)*numOfPhilosophers, cudaMemcpyHostToDevice);
     cudaMalloc((void**)&deviceFork,sizeof(Fork)*numOfPhilosophers);
     cudaMemcpy(deviceFork,&hostForks,sizeof(Fork)*numOfPhilosophers,cudaMemcpyHostToDevice);
+
     // Perform GPU operations with devicePhilosopher
-    
+    if(simulationChoice==1){
+        int numBlocks={};
+        int threadsPerBlock={};
+        /*decided ill make the kernel first then call it accordingly*/
+        //philosopherSimulation<<<numBlocks, threadsPerBlock>>>(devicePhilosopher, deviceFork, numOfPhilosophers);
+        cudaDeviceSynchronize(); // Wait for the kernel to finish
+    }
+    else if(simulationChoice==2){
+        /*ill do the same as above but for the test kernel*/
+    }
+
     // Cleanup
     delete[] hostPhilosophers;
+    delete[] hostForks;
     cudaFree(devicePhilosopher);
+    cudaFree(deviceFork);
 
     return 0;
 }

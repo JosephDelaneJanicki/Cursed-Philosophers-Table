@@ -50,3 +50,8 @@ UPDATE 5: 9/19/2023
 Update 6:
 
   I have an array of philosophers allocated to my gpu. I'll be following a similar process to allocate the forks and from there I should be good to envoke the kernel from main and manage the simulation from there.
+  
+Update 7:
+
+  Forks are now allocated. Ill be putting a pin on host code for noe and make the actual kernel itself. 
+  I;m still considering wether to do a block per philosopher with a thread per fork or to jsut do a thread per philosopher. there are pros and cons and I want to choose a solution based on scaleability, modularity, and ability to smoothly interact with the forks and philosophers to allow more solutions to deadlock.
