@@ -39,10 +39,10 @@ int main() {
     // Makes philosophers and forks on host and puts them on the gpu.
     Philosopher* devicePhilosopher;
     Fork* deviceFork;
-    cudaMalloc((void**)&devicePhilosopher, sizeof(Philosopher));
-    cudaMemcpy(devicePhilosopher, &hostPhilosophers, sizeof(Philosopher), cudaMemcpyHostToDevice);
-    cudaMalloc((void**)&deviceFork,sizeof(Fork));
-    cudaMemcpy(deviceFork,&hostForks,sizeof(Fork),cudaMemcpyHostToDevice);
+    cudaMalloc((void**)&devicePhilosopher, sizeof(Philosopher)*numOfPhilosophers);
+    cudaMemcpy(devicePhilosopher, &hostPhilosophers, sizeof(Philosopher)*numOfPhilosophers, cudaMemcpyHostToDevice);
+    cudaMalloc((void**)&deviceFork,sizeof(Fork)*numOfPhilosophers);
+    cudaMemcpy(deviceFork,&hostForks,sizeof(Fork)*numOfPhilosophers,cudaMemcpyHostToDevice);
     // Perform GPU operations with devicePhilosopher
     
     // Cleanup
