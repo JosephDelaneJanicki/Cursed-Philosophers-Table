@@ -20,7 +20,6 @@ int main() {
         std::cerr << "Cuda failed to set, the philosophers are very picky, they only eat on Nvidia brand tables." << std::endl;
         return 1;
     }
-
     int numOfPhilosophers {}; // initialize where the number of philosophers will be stored
     //prompt for the number of philosophers and read input
     while (true){
@@ -36,11 +35,14 @@ int main() {
     /* Create philosopher objects in host code this has function scope and as a result will only call from main and be destroyed when we move to the kernel (assuming main finishes)
     the line below should account for C++'s requirement to know the size of the array at compilation by using the heap and envoking the "new" operator.*/
     Philosopher* hostPhilosophers = new Philosopher[numOfPhilosophers];
-    // Makes philosophers on host and puts them on the gpu.
+    Fork* hostForks = new Fork[numOfPhilosophers];
+    // Makes philosophers and forks on host and puts them on the gpu.
     Philosopher* devicePhilosopher;
+    Fork* deviceFork;
     cudaMalloc((void**)&devicePhilosopher, sizeof(Philosopher));
     cudaMemcpy(devicePhilosopher, &hostPhilosophers, sizeof(Philosopher), cudaMemcpyHostToDevice);
-
+    cudaMalloc((void**)&deviceFork,sizeof(Fork));
+    cudaMemcpy(deviceFork,&hostForks,sizeof(Fork),cudaMemcpyHostToDevice);
     // Perform GPU operations with devicePhilosopher
     
     // Cleanup
