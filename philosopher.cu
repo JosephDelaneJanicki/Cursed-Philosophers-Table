@@ -48,14 +48,14 @@ class Philosopher {
             while (clock() - startTime < 1000000) { /*the philosopher is eating, using a busy wait loop to simulate it for now. will add logic as needed later on*/ }
         }
 
-        //Due to Philosopher being an object its best to handle device memory with device functions made below
+        /*//Due to Philosopher being an object its best to handle device memory with device functions made below
         void allocateToDevice(Philosopher** devicePtr){
             cudaMalloc((void**)devicePtr,sizeof(Philosopher));
             cudaMemcpy(*devicePtr, this, sizeof(Philosopher), cudaMemcpyHostToDevice);
         }
         void freeDeviceMemory(){
             cudaFree(this);
-        }
+        }*/
 };
 // Fork object to allow solutions that involve changing something about the fork/forks. Forks are picked up and put down by philosophers
 class Fork{
@@ -97,19 +97,32 @@ class Fork{
         }
 };
 
-// kernel definition
-//in a way we can think about this as the table itself
-__global__ void philosopherSimulation(Philosopher* philosophers, Fork* forks, int numPhilosophers) {
+// kernel definitions
+// in a way we can these about this as the table the philosophers eat at
+
+// philosophers as blocks kernel simpler but may be less GPU efficient
+__global__ void philosophersAsBlocks(Philosopher* philosophers, Fork* forks, int numPhilosophers) {
     //thread mapping
-    int philosopherIdx = blockIdx.x; // one block per philosopher
-    int forkIdx = threadIdx.x; // one thread per fork
+int philosopherIdx = blockIdx.x * blockDim.x + threadIdx.x; // Calculate a unique index for each philosopher
+int leftForkIdx = philosopherIdx; // Fork on the left side of the philosopher
+int rightForkIdx = (philosopherIdx + 1) % numPhilosophers; // Fork on the right side of the philosopher
+    
+}
+
+// philosophers and forks as threads will require more synchronization but is more GPU efficient
+__global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, int numPhilosophers) {
+    //thread mapping
+int philosopherIdx = threadIdx.x; // one thread per philosopher
+int leftForkIdx = philosopherIdx; // Fork on the left side of the philosopher
+int rightForkIdx = (philosopherIdx + 1) % numPhilosophers; // Fork on the right side of the philosopher
     
 }
 
 // this is a testing kernal I will call apon when debugging.
 // the idea is this is a single solution table of 5 philosophers I can use to test and garuntee any one solution no matter how absurd does infact, end deadlock
+// I'll base it on the philosophers as threads kernel
 __global__ void testDeadlockResolution(Philosopher* philosophers, Fork* forks, int numPhilosophers = 5){
-    int philosopherIdx = blockIdx.x; 
-    int forkIdx = threadIdx.x;
-     
+int philosopherIdx = threadIdx.x;
+int leftForkIdx = philosopherIdx;
+int rightForkIdx = (philosopherIdx + 1) % numPhilosophers;
 }
