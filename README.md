@@ -54,4 +54,14 @@ Update 6:
 Update 7:
 
   Forks are now allocated. Ill be putting a pin on host code for noe and make the actual kernel itself. 
-  I;m still considering wether to do a block per philosopher with a thread per fork or to jsut do a thread per philosopher. there are pros and cons and I want to choose a solution based on scaleability, modularity, and ability to smoothly interact with the forks and philosophers to allow more solutions to deadlock.
+  I'm still considering wether to do a block per philosopher with a thread per fork or to jsut do a thread per philosopher. there are pros and cons and I want to choose a solution based on scaleability, modularity, and ability to smoothly interact with the forks and philosophers to allow more solutions to deadlock.
+
+Update 8:
+  The first kernel is starting to come together. I feel im close to the first running demo of the project and am getting a good understanding of CUDA. 
+  I decided to use a switch statement and a random number generator to have every philosopher use a random solution every iteration. I will also output text on every action the philosophers take. this should allow the program to tell a sort of story of what all the philosophers did in the simulation. 
+
+  there is one thing to note. deadlock can still theoretically happen if all of the philosophers choose the deadlockable case in the switch case and all pick up one Fork.
+
+  I may remove the deadlock case and put it in a "deadlockable kernel" for the purpose of the code of the original issue existing in the program.
+
+  beyond that i did some set up for solutions that involve terminating philosophers including a death flag, a getter for the flag, ensuring dead philosophers dont take forks to the grave with them, and a condition statement to have dead philosophers skip iterations with no action.

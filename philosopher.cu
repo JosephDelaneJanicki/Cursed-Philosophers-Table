@@ -125,8 +125,12 @@ __global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, in
         Philosopher& philosopher = philosophers[philosopherId];
 
         int randomChoice = rand() % 2; // generate random number for the thread to choose a random solution if any
+
+        //check if the philosopher is dead and skip the iteration if they are
         bool isDead = philosophers[philosopherIdx].isDead();
         if(isDead) continue;
+
+        // switch case that handels the choice of solution. as i make more solutions i can implement them in a case here and increase the int pool in randomChoice accordingly
         switch (randomChoice) {
             case 0:
                 //first case allows deadlock to happen eat method is called in try to pick up forks
