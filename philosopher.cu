@@ -47,15 +47,6 @@ class Philosopher {
             int startTime = clock();
             while (clock() - startTime < 1000000) { /*the philosopher is eating, using a busy wait loop to simulate it for now. will add logic as needed later on*/ }
         }
-
-        /*//Due to Philosopher being an object its best to handle device memory with device functions made below
-        void allocateToDevice(Philosopher** devicePtr){
-            cudaMalloc((void**)devicePtr,sizeof(Philosopher));
-            cudaMemcpy(*devicePtr, this, sizeof(Philosopher), cudaMemcpyHostToDevice);
-        }
-        void freeDeviceMemory(){
-            cudaFree(this);
-        }*/
         __device__ void kill(){
             dead = true;
         }
@@ -126,14 +117,14 @@ __global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, in
         int philosopherId = philosopherIdx; // Get the philosopher's ID
         Philosopher& philosopher = philosophers[philosopherId];
 
-        // Perform philosopher's actions using methods (e.g., think, eat, pick up forks, put down forks)
-        int randomChoice = rand() % 2; // Generates a random number between 0 and 1
+        int randomChoice = rand() % 2; // generate random number for the thread to choose a random solution if any
     
         switch (randomChoice) {
             case 0:
                 //first case allows deadlock to happen eat method is called in try to pick up forks
                 printf("Philosopher %d is thinking.\n", philosopherId);
                 philosophers[philosopherId].think();
+                //this case is ordinary and avoids deadlock by having the philosopher pick up both forks at the same time
                 printf("Philosopher %d is trying to pick up forks.\n", philosopherId);
                 philosophers[philosopherId].tryToPickUpForks(forks[leftForkIdx],forks[rightForkIdx]);
                 break;
@@ -143,7 +134,6 @@ __global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, in
                 printf("Philosopher %d is trying to pick up forks.\n", philosopherId);
                 philosophers[philosopherId].tryToPickUpForksAvoidDeadlock(forks[leftForkIdx],forks[rightForkIdx]);
                 break;
-        // Add more cases for additional methods as needed
     }
         philosophers[philosopherId].think();
         philosophers[philosopherId].tryToPickUpForks(forks[leftForkIdx],forks[rightForkIdx]);
