@@ -47,9 +47,16 @@ class Philosopher {
             int startTime = clock();
             while (clock() - startTime < 1000000) { /*the philosopher is eating, using a busy wait loop to simulate it for now. will add logic as needed later on*/ }
         }
-        __device__ void kill(){
+        __device__ void kill(Fork& leftFork, Fork& rightFork){
             dead = true;
+            leftFork.putDown();
+            rightFork.putDown();
         }
+        //dead getter method
+        __device__ bool isDead(){
+            return dead;
+        }
+
     private:
         bool dead = false;
 };
@@ -118,7 +125,8 @@ __global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, in
         Philosopher& philosopher = philosophers[philosopherId];
 
         int randomChoice = rand() % 2; // generate random number for the thread to choose a random solution if any
-    
+        bool isDead = philosophers[philosopherIdx].isDead();
+        if(isDead) continue;
         switch (randomChoice) {
             case 0:
                 //first case allows deadlock to happen eat method is called in try to pick up forks
