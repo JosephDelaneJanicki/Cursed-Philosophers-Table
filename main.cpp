@@ -9,8 +9,8 @@ using std::cout;
 using std::cin;
 // Host Code
 int main() {
-    //initialize mutex
-    mutex = 0;
+    //initialize random seed
+    srand(time(NULL)); 
     
     // garuntees gpu 0 is used for those running sli however unlikely it is
     cudaError_t cudaStatus = cudaSetDevice(0); 
@@ -37,24 +37,28 @@ int main() {
         cout << format("do you wish to use the main or test simulation: type 1 for main and 2 for test");
         cin >> simulationChoice;
         if ( simulationChoice == 1 || simulationChoice == 2) break;
-    else{
+        else{
             cout << "Invalid input. type 1 for main, type 2 for test" << std::endl;
             cin.clear(); // Clear any error flags
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard the rest of the line
         }
     }
+    while(true){
+        cout << format("")
+
+    }
 
     /* Create philosopher objects in host code this has function scope and as a result will only call from main and be destroyed when we move to the kernel (assuming main finishes)
     the line below should account for C++'s requirement to know the size of the array at compilation by using the heap and envoking the "new" operator.*/
-    Philosopher* hostPhilosophers = new Philosopher[numOfPhilosophers];
-    Fork* hostForks = new Fork[numOfPhilosophers];
+    Philosopher* h_Philosophers = new Philosopher[numOfPhilosophers];
+    Fork* h_Forks = new Fork[numOfPhilosophers];
     // Makes philosophers and forks on host and puts them on the gpu.
-    Philosopher* devicePhilosopher;
-    Fork* deviceFork;
-    cudaMalloc((void**)&devicePhilosopher, sizeof(Philosopher)*numOfPhilosophers);
-    cudaMemcpy(devicePhilosopher, &hostPhilosophers, sizeof(Philosopher)*numOfPhilosophers, cudaMemcpyHostToDevice);
-    cudaMalloc((void**)&deviceFork,sizeof(Fork)*numOfPhilosophers);
-    cudaMemcpy(deviceFork,&hostForks,sizeof(Fork)*numOfPhilosophers,cudaMemcpyHostToDevice);
+    Philosopher* d_Philosopher;
+    Fork* d_Fork;
+    cudaMalloc((void**)&d_Philosopher, sizeof(Philosopher)*numOfPhilosophers);
+    cudaMemcpy(d_Philosopher, &h_Philosophers, sizeof(Philosopher)*numOfPhilosophers, cudaMemcpyHostToDevice);
+    cudaMalloc((void**)&d_Fork,sizeof(Fork)*numOfPhilosophers);
+    cudaMemcpy(d_Fork,&h_Forks,sizeof(Fork)*numOfPhilosophers,cudaMemcpyHostToDevice);
 
     // Perform GPU operations with devicePhilosopher
     if(simulationChoice==1){
@@ -69,10 +73,10 @@ int main() {
     }
 
     // Cleanup
-    delete[] hostPhilosophers;
-    delete[] hostForks;
-    cudaFree(devicePhilosopher);
-    cudaFree(deviceFork);
+    delete[] h_Philosophers;
+    delete[] h_Forks;
+    cudaFree(d_Philosopher);
+    cudaFree(d_Fork);
 
     return 0;
 }

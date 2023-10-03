@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 #include <curand_kernel.h>
-
+#include <cstdio>
 
 //initializa mutex
 /*NOTE: avoid mutexes in philosopher class, mutexes would be best in the fork class and kernel to minimize sequential time and maximize parrallel time. philosophers do the things 
@@ -56,6 +56,11 @@ class Philosopher {
         void freeDeviceMemory(){
             cudaFree(this);
         }*/
+        __device__ void kill(){
+            dead = true;
+        }
+    private:
+        bool dead = false;
 };
 // Fork object to allow solutions that involve changing something about the fork/forks. Forks are picked up and put down by philosophers
 class Fork{
@@ -103,19 +108,49 @@ class Fork{
 // philosophers as blocks kernel simpler but may be less GPU efficient
 __global__ void philosophersAsBlocks(Philosopher* philosophers, Fork* forks, int numPhilosophers) {
     //thread mapping
-int philosopherIdx = blockIdx.x * blockDim.x + threadIdx.x; // Calculate a unique index for each philosopher
-int leftForkIdx = philosopherIdx; // Fork on the left side of the philosopher
-int rightForkIdx = (philosopherIdx + 1) % numPhilosophers; // Fork on the right side of the philosopher
+    int philosopherIdx = blockIdx.x * blockDim.x + threadIdx.x; // Calculate a unique index for each philosopher
+    int leftForkIdx = philosopherIdx; // Fork on the left side of the philosopher
+    int rightForkIdx = (philosopherIdx + 1) % numPhilosophers; // Fork on the right side of the philosopher
     
 }
 
 // philosophers and forks as threads will require more synchronization but is more GPU efficient
-__global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, int numPhilosophers) {
+__global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, int numPhilosophers,int iterations) {
     //thread mapping
-int philosopherIdx = threadIdx.x; // one thread per philosopher
-int leftForkIdx = philosopherIdx; // Fork on the left side of the philosopher
-int rightForkIdx = (philosopherIdx + 1) % numPhilosophers; // Fork on the right side of the philosopher
+    int philosopherIdx = threadIdx.x; // one thread per philosopher
+    int leftForkIdx = philosopherIdx; // Fork on the left side of the philosopher
+    int rightForkIdx = (philosopherIdx + 1) % numPhilosophers; // Fork on the right side of the philosopher
+
+    for (int iteration = 0; iteration < iterations; ++iteration) {
+        // Philosopher actions
+        int philosopherId = philosopherIdx; // Get the philosopher's ID
+        Philosopher& philosopher = philosophers[philosopherId];
+
+        // Perform philosopher's actions using methods (e.g., think, eat, pick up forks, put down forks)
+        int randomChoice = rand() % 2; // Generates a random number between 0 and 1
     
+        switch (randomChoice) {
+            case 0:
+                //first case allows deadlock to happen eat method is called in try to pick up forks
+                printf("Philosopher %d is thinking.\n", philosopherId);
+                philosophers[philosopherId].think();
+                printf("Philosopher %d is trying to pick up forks.\n", philosopherId);
+                philosophers[philosopherId].tryToPickUpForks(forks[leftForkIdx],forks[rightForkIdx]);
+                break;
+            case 1:
+                printf("Philosopher %d is thinking.\n", philosopherId);
+                philosophers[philosopherId].think();
+                printf("Philosopher %d is trying to pick up forks.\n", philosopherId);
+                philosophers[philosopherId].tryToPickUpForksAvoidDeadlock(forks[leftForkIdx],forks[rightForkIdx]);
+                break;
+        // Add more cases for additional methods as needed
+    }
+        philosophers[philosopherId].think();
+        philosophers[philosopherId].tryToPickUpForks(forks[leftForkIdx],forks[rightForkIdx]);
+
+        // Synchronize threads to avoid conflicts
+        __syncthreads();
+    }
 }
 
 // this is a testing kernal I will call apon when debugging.
