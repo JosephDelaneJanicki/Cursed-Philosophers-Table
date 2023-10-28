@@ -10,6 +10,44 @@
 forks are the rescources so let the forks protect themselves with mutexes philosophers are supposed to be fork greedy */
 
 // Philosopher definition
+class Fork{
+private:
+
+    bool available = true;  //fork availability to pick up, by default they are available
+    int* mutex; // Private mutex for each fork
+
+public:
+
+    int temprature {}; // how hot or cold the fork is to the touch
+
+    // this method checks if a fork is available since this is a read only method i dont have a mutex here
+    __device__ bool isAvailable() {
+        return available;
+    }
+
+    // this method allows the fork to be picked up
+    __device__ bool pickUp() {
+        while (atomicExch(mutex, 1) != 0) {
+        // Wait while the mutex is locked
+        }
+        /*other philosophers need to be able to read the fork object to check availability. 
+        I also want to minimize mutext time so im closing the mutex imediately when available value changes*/ 
+        if (available) {
+            available = false;
+            atomicExch(mutex, 0); // Release the mutex 
+            return true; // Successfully picked up the fork
+        }       
+        else {
+            atomicExch(mutex, 0); // Release the mutex
+            return false; // Fork is not available
+        }
+    }
+
+    // I opted not to use a mutex on this function since only one philosopher will be attempting to use this method per fork at any time
+    __device__ void putDown() {
+        available = true; // Fork is now available for other philosophers
+    }
+};
 class Philosopher {
     public:
 
@@ -64,44 +102,7 @@ class Philosopher {
         bool dead = false;
 };
 // Fork object to allow solutions that involve changing something about the fork/forks. Forks are picked up and put down by philosophers
-class Fork{
-    private:
 
-        bool available = true;  //fork availability to pick up, by default they are available
-        int* mutex; // Private mutex for each fork
-
-    public:
-
-        int temprature {}; // how hot or cold the fork is to the touch
-
-        // this method checks if a fork is available since this is a read only method i dont have a mutex here
-        __device__ bool isAvailable() {
-            return available;
-        }
-
-        // this method allows the fork to be picked up
-        __device__ bool pickUp() {
-            while (atomicExch(mutex, 1) != 0) {
-            // Wait while the mutex is locked
-            }
-            /*other philosophers need to be able to read the fork object to check availability. 
-            I also want to minimize mutext time so im closing the mutex imediately when available value changes*/ 
-            if (available) {
-                available = false;
-                atomicExch(mutex, 0); // Release the mutex 
-                return true; // Successfully picked up the fork
-            }       
-            else {
-                atomicExch(mutex, 0); // Release the mutex
-                return false; // Fork is not available
-            }
-        }
-
-        // I opted not to use a mutex on this function since only one philosopher will be attempting to use this method per fork at any time
-        __device__ void putDown() {
-            available = true; // Fork is now available for other philosophers
-        }
-};
 
 // kernel definitions
 // in a way we can these about this as the table the philosophers eat at
