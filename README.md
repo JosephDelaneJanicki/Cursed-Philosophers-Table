@@ -65,3 +65,15 @@ Update 8:
   I may remove the deadlock case and put it in a "deadlockable kernel" for the purpose of the code of the original issue existing in the program.
 
   beyond that i did some set up for solutions that involve terminating philosophers including a death flag, a getter for the flag, ensuring dead philosophers dont take forks to the grave with them, and a condition statement to have dead philosophers skip iterations with no action.
+
+Update 9:
+  realized there is a way simpler and less problem prone way to simulate thinking and eating. just use a for loop with a massive iteration count, no calls to anything else  no methods, no data movement, just looping.
+
+  changed the rng implamented to be more gpu friendly. line 131
+
+  deleted unused global mutex since im using Cudas built in mutex functions wich is more gpu friendly. i also did clean up elsewhere including the Deletion of duplicate
+  think and eat methods left after the switch statement
+  
+  added error handling for memory allocation in the host code and set up the block and thread count in the conditionals that decide wich kernel to call based on user input. I'm keeping the memory allocation outside of the conditions called once since the only thing changing is the block and thread count. 
+
+  set up the host to call the kernel and updated the makefile so now running "make" from the file directory should create an executable

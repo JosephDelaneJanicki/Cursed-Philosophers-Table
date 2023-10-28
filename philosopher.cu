@@ -4,19 +4,21 @@
 #include <device_launch_parameters.h>
 #include <curand_kernel.h>
 #include <cstdio>
+#include <unistd.h>
 
 //initializa mutex
 /*NOTE: avoid mutexes in philosopher class, mutexes would be best in the fork class and kernel to minimize sequential time and maximize parrallel time. philosophers do the things 
 forks are the rescources so let the forks protect themselves with mutexes philosophers are supposed to be fork greedy */
-__device__ int mutex; // Declare a mutex variable
 
 // Philosopher definition
 class Philosopher {
     public:
 
         __device__ void think() {
-            int startTime = clock();
-            while (clock() - startTime < 1000000) { /*the philosopher is thinking, using a busy wait loop to simulate it for now will add logic as needed later on*/ }
+        // Simulate thinking by doing some work
+        for (int i = 0; i < 1000000; i++) {
+            // Thinking
+            }
         }
 
         __device__ void tryToPickUpForks(Fork& leftFork, Fork& rightFork){
@@ -44,8 +46,10 @@ class Philosopher {
         }
 
         __device__ void eat(Fork& leftFork, Fork& rightFork){
-            int startTime = clock();
-            while (clock() - startTime < 1000000) { /*the philosopher is eating, using a busy wait loop to simulate it for now. will add logic as needed later on*/ }
+        // Simulate eating by doing some work
+        for (int i = 0; i < 1000000; i++) {
+            //eating
+        }
         }
         __device__ void kill(Fork& leftFork, Fork& rightFork){
             dead = true;
@@ -123,8 +127,9 @@ __global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, in
         // Philosopher actions
         int philosopherId = philosopherIdx; // Get the philosopher's ID
         Philosopher& philosopher = philosophers[philosopherId];
-
-        int randomChoice = rand() % 2; // generate random number for the thread to choose a random solution if any
+        curandState state;
+        curand_init(1234, threadIdx.x, 0, &state); // Use different seeds for each thread
+        int randomChoice = curand(&state) % 2; // generate random number for the thread to choose a random solution if any
 
         //check if the philosopher is dead and skip the iteration if they are
         bool isDead = philosophers[philosopherIdx].isDead();
@@ -147,18 +152,16 @@ __global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, in
                 philosophers[philosopherId].tryToPickUpForksAvoidDeadlock(forks[leftForkIdx],forks[rightForkIdx]);
                 break;
     }
-        philosophers[philosopherId].think();
-        philosophers[philosopherId].tryToPickUpForks(forks[leftForkIdx],forks[rightForkIdx]);
-
-        // Synchronize threads to avoid conflicts
+        // Synchronize threads 
         __syncthreads();
     }
+    printf("simulation finished");
 }
 
 // this is a testing kernal I will call apon when debugging.
 // the idea is this is a single solution table of 5 philosophers I can use to test and garuntee any one solution no matter how absurd does infact, end deadlock
 // I'll base it on the philosophers as threads kernel
-__global__ void testDeadlockResolution(Philosopher* philosophers, Fork* forks, int numPhilosophers = 5){
+__global__ void testDeadlockSolution(Philosopher* philosophers, Fork* forks, int iterations){
 int philosopherIdx = threadIdx.x;
 int leftForkIdx = philosopherIdx;
 int rightForkIdx = (philosopherIdx + 1) % numPhilosophers;

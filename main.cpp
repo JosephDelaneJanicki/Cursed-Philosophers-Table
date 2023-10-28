@@ -12,8 +12,9 @@ int main() {
     //initialize random seed
     srand(time(NULL)); 
     
-    // garuntees gpu 0 is used for those running sli however unlikely it is
-    cudaError_t cudaStatus = cudaSetDevice(0); 
+    cudaError_t cudaStatus; // cudaStatus variable for error checking
+    
+    cudaStatus = cudaSetDevice(0);  // garuntees gpu 0 is used for those running sli however unlikely it is
 
     //check for a nvidia gpu and prompts the user if they dont
     if (cudaStatus != cudaSuccess) {
@@ -22,6 +23,7 @@ int main() {
     }
     int numOfPhilosophers {}; // initialize where the number of philosophers will be stored
     int simulationChoice {};
+    int iterations {};
     //prompt for the number of philosophers and read input
     while (true){
         cout << format("How many philosophers would you like to simulate?");
@@ -43,8 +45,16 @@ int main() {
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard the rest of the line
         }
     }
+    //prompt for number of iterations or "steps" to run the simulation for
     while(true){
-        cout << format("")
+        cout << format("How many iterations would you like to run the simulation for?");
+        
+        if( cin >> iterations && iterations > 0) break;
+        else{
+            cout << "Invalid input. the number of iterations must be a positive integer" << std::endl;
+            cin.clear(); // Clear any error flags
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Discard the rest of the line
+        }
 
     }
 
@@ -52,24 +62,36 @@ int main() {
     the line below should account for C++'s requirement to know the size of the array at compilation by using the heap and envoking the "new" operator.*/
     Philosopher* h_Philosophers = new Philosopher[numOfPhilosophers];
     Fork* h_Forks = new Fork[numOfPhilosophers];
-    // Makes philosophers and forks on host and puts them on the gpu.
+
+    // Makes philosophers and forks for device
     Philosopher* d_Philosopher;
     Fork* d_Fork;
-    cudaMalloc((void**)&d_Philosopher, sizeof(Philosopher)*numOfPhilosophers);
-    cudaMemcpy(d_Philosopher, &h_Philosophers, sizeof(Philosopher)*numOfPhilosophers, cudaMemcpyHostToDevice);
-    cudaMalloc((void**)&d_Fork,sizeof(Fork)*numOfPhilosophers);
-    cudaMemcpy(d_Fork,&h_Forks,sizeof(Fork)*numOfPhilosophers,cudaMemcpyHostToDevice);
-
+    //allocate philosophers
+    cudaStatus = cudaMalloc((void**)&d_Philosopher, sizeof(Philosopher)*numOfPhilosophers);
+    if (cudaStatus != cudaSuccess) {fprintf(stderr, "CUDA error: %s\n", cudaGetErrorString(cudaStatus));return 1;}
+    cudaStatus = cudaMemcpy(d_Philosopher, &h_Philosophers, sizeof(Philosopher)*numOfPhilosophers, cudaMemcpyHostToDevice);
+    if (cudaStatus != cudaSuccess) {fprintf(stderr, "CUDA error: %s\n", cudaGetErrorString(cudaStatus));return 1;}
+    //allocate forks
+    cudaStatus = cudaMalloc((void**)&d_Fork,sizeof(Fork)*numOfPhilosophers);
+    if (cudaStatus != cudaSuccess) {fprintf(stderr, "CUDA error: %s\n", cudaGetErrorString(cudaStatus));return 1;}
+    cudaStatus = cudaMemcpy(d_Fork,&h_Forks,sizeof(Fork)*numOfPhilosophers,cudaMemcpyHostToDevice);
+    if (cudaStatus != cudaSuccess) {fprintf(stderr, "CUDA error: %s\n", cudaGetErrorString(cudaStatus));return 1;}
     // Perform GPU operations with devicePhilosopher
-    if(simulationChoice==1){
-        int numBlocks={};
-        int threadsPerBlock={};
-        /*decided ill make the kernel first then call it accordingly*/
-        //philosopherSimulation<<<numBlocks, threadsPerBlock>>>(devicePhilosopher, deviceFork, numOfPhilosophers);
+
+    if(simulationChoice==1){ //run as one philosopher per thread
+        //set the number of blocks and 
+        int numBlocks=1;
+        int threadsPerBlock=numOfPhilosophers;
+        //envoke the kernel
+        philosophersAsThreads<<<numBlocks, threadsPerBlock>>>(devicePhilosopher, deviceFork, numOfPhilosophers,iterations);
         cudaDeviceSynchronize(); // Wait for the kernel to finish
     }
+
     else if(simulationChoice==2){
-        /*ill do the same as above but for the test kernel*/
+        int numBlocks=1;
+        int threadsPerBlock=5;
+        //envoke the kernel
+        testDeadlockSolution<<<numBlocks, threadsPerBlock>>>(devicePhilosopher, deviceFork,iterations);
     }
 
     // Cleanup
