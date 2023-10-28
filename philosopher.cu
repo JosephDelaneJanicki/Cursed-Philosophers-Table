@@ -4,7 +4,6 @@
 #include <device_launch_parameters.h>
 #include <curand_kernel.h>
 #include <cstdio>
-#include <unistd.h>
 
 //initializa mutex
 /*NOTE: avoid mutexes in philosopher class, mutexes would be best in the fork class and kernel to minimize sequential time and maximize parrallel time. philosophers do the things 
@@ -24,7 +23,7 @@ class Philosopher {
         __device__ void tryToPickUpForks(Fork& leftFork, Fork& rightFork){
 
             if (leftFork.isAvailable())  {leftFork.pickUp(); think();}  // by thinking here i can garuntee deadlock since now the forks are picked up one at a time
-            else  think(); tryToPickUpForks;
+            else  think(); tryToPickUpForks(leftFork,rightFork);
 
             while(rightFork.isAvailable() == false) think();
             rightFork.pickUp();
@@ -164,5 +163,5 @@ __global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, in
 __global__ void testDeadlockSolution(Philosopher* philosophers, Fork* forks, int iterations){
 int philosopherIdx = threadIdx.x;
 int leftForkIdx = philosopherIdx;
-int rightForkIdx = (philosopherIdx + 1) % numPhilosophers;
+int rightForkIdx = (philosopherIdx + 1) % 5;
 }

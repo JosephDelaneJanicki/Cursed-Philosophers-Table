@@ -83,7 +83,7 @@ int main() {
         int numBlocks=1;
         int threadsPerBlock=numOfPhilosophers;
         //envoke the kernel
-        philosophersAsThreads<<<numBlocks, threadsPerBlock>>>(devicePhilosopher, deviceFork, numOfPhilosophers,iterations);
+        philosophersAsThreads<<<numBlocks, threadsPerBlock>>>(d_Philosopher, d_Fork, numOfPhilosophers,iterations);
         cudaDeviceSynchronize(); // Wait for the kernel to finish
     }
 
@@ -91,7 +91,7 @@ int main() {
         int numBlocks=1;
         int threadsPerBlock=5;
         //envoke the kernel
-        testDeadlockSolution<<<numBlocks, threadsPerBlock>>>(devicePhilosopher, deviceFork,iterations);
+        testDeadlockSolution<<<numBlocks, threadsPerBlock>>>(d_Philosopher, d_Fork,iterations);
     }
 
     // Cleanup

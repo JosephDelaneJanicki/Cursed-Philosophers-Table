@@ -1,15 +1,15 @@
 {
   "configurations": [
     {
-      "name": "windows-gcc-x64",
+      "name": "CUDA Toolkit",
       "includePath": [
         "${workspaceFolder}/**",
         "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.2\\include"
       ],
-      "compilerPath": "C:/mingw64/bin/gcc.exe",
+      "compilerPath": "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.2/bin/nvcc.exe",
       "cStandard": "c11",
       "cppStandard": "c++20",
-      "intelliSenseMode": "windows-gcc-x64",
+      "intelliSenseMode": "msvc-x64",
       "compilerArgs": [
         ""
       ],
