@@ -106,14 +106,14 @@ class Fork{
 // kernel definitions
 // in a way we can these about this as the table the philosophers eat at
 
-// philosophers as blocks kernel simpler but may be less GPU efficient
+/* philosophers as blocks kernel simpler but may be less GPU efficient
 __global__ void philosophersAsBlocks(Philosopher* philosophers, Fork* forks, int numPhilosophers) {
     //thread mapping
     int philosopherIdx = blockIdx.x * blockDim.x + threadIdx.x; // Calculate a unique index for each philosopher
     int leftForkIdx = philosopherIdx; // Fork on the left side of the philosopher
     int rightForkIdx = (philosopherIdx + 1) % numPhilosophers; // Fork on the right side of the philosopher
     
-}
+}*/
 
 // philosophers and forks as threads will require more synchronization but is more GPU efficient
 __global__ void philosophersAsThreads(Philosopher* philosophers, Fork* forks, int numPhilosophers,int iterations) {
